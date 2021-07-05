@@ -5,10 +5,16 @@ Sample project involving data manipulations and REST API serving.
 
 ## Quickstart
 
+Install a virtual environment (optional):
 ```
 python -m venv ./venv
-make setup  # install package and dependencies
-make test   # run python tests
+source ./venv/bin/activate
+```
+
+Install the package and its requirements, run tests
+```
+make setup
+make test
 ```
 
 Once you have changed the code, you can run linters:
@@ -22,7 +28,7 @@ make lint    # auto-format and then verify
 
 ### Step 1. Exploratory data cleaning
 
-see [notebooks](notebooks).
+See [notebooks](notebooks).
 
 
 ### Step 2. Extracting the cleaning code to Python
@@ -57,12 +63,12 @@ Turns raw (original) dataframe into a cleaned one. This command needs to be run 
 Example:
 
 ```
-$ voucher_selection data clean --input-parquet data/orders_raw.parquet  --output-csv data/orders_cleaned.csv
-Reading input dataset from: data/orders_raw.parquet
+$ voucher_selection data clean --input-parquet data/data.parquet --output-csv data/data_clean.csv
+Reading input dataset from: data/data.parquet
 INFO:/plain/github/mine/case-voucher-selection/src/voucher_selection/data_cleaning.py:Cleaning raw dataset of size: 3068562
-Saving output dataset to: data/orders_cleaned.csv
+Saving output dataset to: data/data_clean.csv
 ```
 
 Tests:
-- logic: [tests/test_data_cleaning.py](tests/test_data_cleaning.py)
-- cli: [tests/test_cli.py](tests/test_cli.py)
+- data cleaning logic: [tests/test_data_cleaning.py](tests/test_data_cleaning.py)
+- CLI: [tests/test_cli.py](tests/test_cli.py)

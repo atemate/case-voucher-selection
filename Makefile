@@ -14,9 +14,3 @@ lint: format
 	black --check $(LINT_DIRS)
 	flake8 $(LINT_DIRS)
 	isort --check --recursive $(LINT_DIRS)
-
-RAW_DATASET = ./data/orders_raw.parquet
-CLEANED_DATASET = ./data/orders_cleaned.csv
-
-clean_dataset:
-	python -c ''
