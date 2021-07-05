@@ -3,6 +3,10 @@ from pathlib import Path
 import pytest
 
 
+# pytest_plugins = ["pytest_pgsql"]
+pytest_plugins = ["pytest_postgresql"]
+
+
 CURRENT_DIR = Path(__file__).parent
 TESTS_DIR = CURRENT_DIR
 

@@ -22,7 +22,7 @@ def _setup_logger(level=logging.INFO):
 
 @app.callback()
 def main(verbose: bool = False):
-    """ Voucher selection app """
+    """Voucher selection app"""
     level = logging.DEBUG if verbose else logging.INFO
     _setup_logger(level)
 
@@ -34,7 +34,7 @@ def data_clean(
     ),
     output_csv: Path = typer.Option(..., help="Path to the output file in csv format"),
 ):
-    """ Clean input raw dataset"""
+    """Clean input raw dataset"""
     typer.echo(f"Reading input dataset from: {input_parquet}")
     if not input_parquet.exists():
         raise ValueError(f"Input dataset not found: {input_parquet}")
