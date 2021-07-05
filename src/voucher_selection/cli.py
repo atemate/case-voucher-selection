@@ -1,17 +1,22 @@
 import logging
+import os
 from pathlib import Path
 
 import pandas as pd
 import typer
 
 from .data_cleaning import clean_orders_raw
+from .server.config import create_db_config, create_server_config
+from .server.db import DBManager, get_connection
 
 
 app = typer.Typer()
 data_app = typer.Typer()
+server_app = typer.Typer()
 
 
 app.add_typer(data_app, name="data")
+app.add_typer(server_app, name="server")
 
 
 def _setup_logger(level=logging.INFO):
@@ -21,7 +26,7 @@ def _setup_logger(level=logging.INFO):
 
 
 @app.callback()
-def main(verbose: bool = False):
+def app_callback(verbose: bool = False):
     """Voucher selection app"""
     level = logging.DEBUG if verbose else logging.INFO
     _setup_logger(level)
@@ -44,3 +49,21 @@ def data_clean(
     df = clean_orders_raw(df)
     typer.echo(f"Saving output dataset to: {output_csv}")
     df.to_csv(output_csv, index=False)
+
+
+@server_app.command("seed")
+def server_seed(
+    input_csv: Path = typer.Option(..., help="Path to the dataset in csv format")
+):
+    if not input_csv.is_file():
+        raise ValueError(f"Input dataset not found: {input_csv}")
+
+    db_config = create_db_config()
+    typer.echo(f"Database config: {db_config}")
+
+    conn = get_connection(db_config)
+    db = DBManager(conn)
+    typer.echo(f"Creating DB table if not exists...")
+    db.create_table()
+    typer.echo(f"Loading values to DB from file: {input_csv}")
+    db.insert_from_csv(input_csv)

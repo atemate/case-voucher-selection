@@ -5,9 +5,10 @@ import pandas.api.types as ptypes
 import pytest
 
 from voucher_selection.data_cleaning import (
-    ORDER_COLUMNS,
+    DATA_COLUMNS,
     clean_orders_raw,
     convert_str_to_int,
+    load_csv,
 )
 
 
@@ -23,7 +24,7 @@ timestamp	country_code	last_order_ts	first_order_ts	total_orders	voucher_amount
 
 @pytest.fixture
 def orders_raw() -> pd.DataFrame:
-    return pd.read_csv(io.StringIO(ORDERS_RAW_TEXT), delimiter="\t")
+    return load_csv(io.StringIO(ORDERS_RAW_TEXT), delimiter="\t")
 
 
 def test_convert_str_to_int_empty_string():
@@ -63,7 +64,7 @@ def test_convert_str_to_int_invalid_string(value: str):
 def test_clean_orders_raw_correct_size(orders_raw: pd.DataFrame):
     df = clean_orders_raw(orders_raw)
     assert df.size == orders_raw.size
-    assert list(df.columns) == ORDER_COLUMNS
+    assert list(df.columns) == DATA_COLUMNS
 
 
 def test_clean_orders_raw_correct_no_nans(orders_raw: pd.DataFrame):

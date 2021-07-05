@@ -9,19 +9,23 @@ from voucher_selection.server.config import (
 
 
 def test_create_config_error_require_db_password():
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError, match="Missing"):
         create_config(env={})
 
 
 def test_create_config_ok_defaults():
-    env = {"DB_USERNAME": "db-username", "DB_PASSWORD": "db-password"}
+    env = {
+        "APP_DB_HOST": "db-host",
+        "APP_DB_USERNAME": "db-username",
+        "APP_DB_PASSWORD": "db-password",
+    }
     config = create_config(env)
     assert config == Config(
         server=ServerConfig(host="0.0.0.0", port=8080),
         db=DBConfig(
             username="db-username",
             password="db-password",
-            host="localhost",
+            host="db-host",
             port=5432,
             database="voucher_selection",
             table="orders",
@@ -31,14 +35,14 @@ def test_create_config_ok_defaults():
 
 def test_create_config_ok_overload():
     env = {
-        "SERVER_HOST": "server.localhost",
-        "SERVER_PORT": 80,
-        "DB_HOST": "db.localhost",
-        "DB_PORT": 5678,
-        "DB_PASSWORD": "db-password",
-        "DB_USERNAME": "db-username",
-        "DB_DATABASE": "db-database",
-        "DB_TABLE": "db-table",
+        "APP_SERVER_HOST": "server.localhost",
+        "APP_SERVER_PORT": 80,
+        "APP_DB_HOST": "db.localhost",
+        "APP_DB_PORT": 5678,
+        "APP_DB_PASSWORD": "db-password",
+        "APP_DB_USERNAME": "db-username",
+        "APP_DB_DATABASE": "db-database",
+        "APP_DB_TABLE": "db-table",
     }
     config = create_config(env)
     assert config == Config(

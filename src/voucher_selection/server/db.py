@@ -1,15 +1,21 @@
 # import pandas as pd
+import logging
 from pathlib import Path
 from textwrap import dedent
 from typing import Union
 
+import pandas as pd
+import psycopg2
 from psycopg2.extensions import connection
 
+from ..data_cleaning import load_csv
+from ..utils import iter_paged
 # from databases import Database
 # from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, create_engine
 from .config import DBConfig
 
 
+logger = logging.getLogger()
 DB_COLUMNS = {
     "timestamp": "DATE",
     "country_code": "VARCHAR",
@@ -47,20 +53,23 @@ class DBManager:
             self._conn.commit()
 
     def insert_from_csv(self, csv_path: Union[str, Path]):
-        if not csv_path.exists():
-            raise FileNotFoundError(csv_path)
+        df = load_csv(csv_path)
+        size = df.shape[0]
 
         columns = ", ".join(DB_COLUMNS)
-        sql = dedent(
-            f"""\
-            COPY {self.table} (
-                {columns}
-            )
-            FROM '{csv_path}'
-            DELIMITER ','
-            CSV HEADER;
-            """
-        )
         with self._conn.cursor() as cur:
-            cur.execute(sql)
+            logger.info(f"Building the query of {size} rows")
+            values = [tupl[1] for tupl in df.iterrows()]
+            values = [tuple(str(v) for v in row) for row in values]
+            values_template = ",".join(["%s"] * len(values))
+            sql = dedent(
+                f"""\
+                INSERT INTO {self.table} ({columns})
+                VALUES {values_template}
+                """
+            )
+            logger.info(f"Executing the query")
+            cur.execute(sql, values)
             self._conn.commit()
+
+        logger.info(f"Successfully inserted {size} rows from {csv_path}")

@@ -1,5 +1,5 @@
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict
 
 
@@ -12,15 +12,15 @@ class ServerConfig:
 @dataclass(frozen=True)
 class DBConfig:
     username: str
-    password: str
-    host: str = "localhost"
+    password: str = field(repr=False)  # hide this field from repr
+    host: str
     port: int = 5432
     database: str = "voucher_selection"
     table: str = "orders"
 
     @property
     def url(self) -> str:
-        cred = f"{self.user}:{self.password}"
+        cred = f"{self.username}:{self.password}"
         return f"postgresql://{cred}@{self.host}:{self.port}/{self.database}"
 
 
@@ -30,17 +30,33 @@ class Config:
     db: DBConfig
 
 
+def create_server_config(env: Dict[str, Any] = os.environ) -> Config:
+    config = ServerConfig(
+        host=env.get("APP_SERVER_HOST", ServerConfig.host),
+        port=int(env.get("APP_SERVER_PORT", ServerConfig.port)),
+    )
+
+    return config
+
+
+def _get_required(env, name: str):
+    val = env.get(name)
+    if not val:
+        raise ValueError(f"Missing env var: '{name}'")
+    return val
+
+
+def create_db_config(env: Dict[str, Any] = os.environ) -> Config:
+    config = DBConfig(
+        username=_get_required(env, "APP_DB_USERNAME"),
+        password=_get_required(env, "APP_DB_PASSWORD"),
+        host=_get_required(env, "APP_DB_HOST"),
+        port=int(env.get("APP_DB_PORT", DBConfig.port)),
+        database=env.get("APP_DB_DATABASE", DBConfig.database),
+        table=env.get("APP_DB_TABLE", DBConfig.table),
+    )
+    return config
+
+
 def create_config(env: Dict[str, Any] = os.environ) -> Config:
-    server = ServerConfig(
-        host=env.get("SERVER_HOST", ServerConfig.host),
-        port=int(env.get("SERVER_PORT", ServerConfig.port)),
-    )
-    db = DBConfig(
-        username=env["DB_USERNAME"],
-        password=env["DB_PASSWORD"],
-        host=env.get("DB_HOST", DBConfig.host),
-        port=int(env.get("DB_PORT", DBConfig.port)),
-        database=env.get("DB_DATABASE", DBConfig.database),
-        table=env.get("DB_TABLE", DBConfig.table),
-    )
-    return Config(server=server, db=db)
+    return Config(server=create_server_config(env), db=create_db_config(env))
