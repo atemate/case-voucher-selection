@@ -1,12 +1,11 @@
 import logging
-import os
 from pathlib import Path
 
 import pandas as pd
 import typer
 
 from .data_cleaning import clean_orders_raw
-from .server.config import create_db_config, create_server_config
+from .server.config import create_db_config
 from .server.db import DBManager, get_connection
 
 

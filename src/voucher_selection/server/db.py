@@ -1,17 +1,12 @@
-# import pandas as pd
 import logging
 from pathlib import Path
 from textwrap import dedent
 from typing import Union
 
-import pandas as pd
 import psycopg2
 from psycopg2.extensions import connection
 
 from ..data_cleaning import load_csv
-from ..utils import iter_paged
-# from databases import Database
-# from sqlalchemy import Column, DateTime, Integer, MetaData, String, Table, create_engine
 from .config import DBConfig
 
 
