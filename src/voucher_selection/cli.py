@@ -12,11 +12,11 @@ from .server.db import DBManager, get_connection
 
 app = typer.Typer()
 data_app = typer.Typer()
-server_app = typer.Typer()
+db_app = typer.Typer()
 
 
 app.add_typer(data_app, name="data")
-app.add_typer(server_app, name="server")
+app.add_typer(db_app, name="db")
 
 
 def _setup_logger(level=logging.INFO):
@@ -51,8 +51,12 @@ def data_clean(
     df.to_csv(output_csv, index=False)
 
 
-@server_app.command("seed")
-def server_seed(
+# server_host: str = typer.Option("0.0.0.0", envvar="SERVER_HOST"),
+# server_port: int = typer.Option(8080, envvar="SERVER_PORT"),
+
+
+@db_app.command("seed")
+def db_seed(
     input_csv: Path = typer.Option(..., help="Path to the dataset in csv format")
 ):
     if not input_csv.is_file():

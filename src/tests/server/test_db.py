@@ -40,4 +40,4 @@ class TestPostgresQueryManager:
         with postgresql.cursor() as cur:
             cur.execute(f"SELECT COUNT(*) FROM {m.table}")
             count = cur.fetchone()[0]
-            assert count == 3, "Table was not created"
+            assert count == 3
