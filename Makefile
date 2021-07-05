@@ -8,9 +8,9 @@ test:
 
 format:
 	black $(LINT_DIRS)
-	isort --recursive $(LINT_DIRS)
+	isort $(LINT_DIRS)
 
 lint: format
 	black --check $(LINT_DIRS)
 	flake8 $(LINT_DIRS)
-	isort --check --recursive $(LINT_DIRS)
+	isort --check $(LINT_DIRS)
