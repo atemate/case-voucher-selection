@@ -20,3 +20,11 @@ lint: format
 	black --check $(LINT_DIRS)
 	flake8 $(LINT_DIRS)
 	isort --check $(LINT_DIRS)
+
+.PHONY: \
+	setup \
+	test_unit \
+	test_e2e \
+	test \
+	format \
+	lint

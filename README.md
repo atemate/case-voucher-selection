@@ -23,6 +23,20 @@ make format  # auto-format
 make lint    # auto-format and then verify
 ```
 
+To start the HTTP API in local docker:
+```
+docker-compose build
+docker-compose up
+```
+
+To test the HTTP API:
+```
+curl http://0.0.0.0:8080/ping
+curl http://0.0.0.0:8080/voucher -X POST -H "Content-type: application/json" -d '{"frequency_segment": "3-4", "recency_segment": "600-601", "country_code": "Peru"}'
+```
+
+
+
 ## Configuration
 
 Some commands use environment variables for configuration:
@@ -73,6 +87,15 @@ At this step, we added database connectors and created a command to "seed" value
 
 ### Step 4: Setting up the REST (HTTP) API server connected to SQL
 At this step, we implemented the logic of computing segments (on-the-fly, without caching), and exposed it via a FastAPI server (similar to Flask).
+
+### Step 5: Dockerize application
+At this step, we prepared a docker-compose setup to run postgresql and our app in docker.
+
+To build docker image and start the server:
+```
+docker-compose build
+docker-compose up
+```
 
 
 ## CLI Commands

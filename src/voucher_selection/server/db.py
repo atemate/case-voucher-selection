@@ -59,7 +59,6 @@ def get_connection(config: DBConfig):
     return psycopg2.connect(config.url)
 
 
-@contextmanager
 def get_db(db_config: DBConfig):
     return get_db_by_connection(get_connection(db_config))
 
