@@ -3,8 +3,14 @@ LINT_DIRS = setup.py src/voucher_selection src/tests
 setup:
 	pip install -r requirements-dev.txt
 
-test:
-	pytest -v src/tests
+test_unit:
+	pytest -v src/tests/unit
+
+test_e2e:
+	pytest -v src/tests/e2e
+
+test: unit test_e2e
+	@echo OK
 
 format:
 	black $(LINT_DIRS)

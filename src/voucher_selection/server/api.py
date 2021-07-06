@@ -25,8 +25,7 @@ class CustomerInput(pydantic.BaseModel):
 
 
 def parse_segment_interval(value: str) -> Tuple[int, int]:
-    # TODO: tests
-    match = PATTERN_SEGMENT_INTERVAL.search(value)
+    match = PATTERN_SEGMENT_INTERVAL.search(str(value))
     if match is None:
         e = f"Invalid segment interval '{value}'"
         raise ValueError(f"{e}: does not match pattern {PATTERN_SEGMENT_INTERVAL}")
