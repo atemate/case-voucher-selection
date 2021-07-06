@@ -4,12 +4,12 @@ setup:
 	pip install -r requirements-dev.txt
 
 test_unit:
-	pytest -vs src/tests/unit -k test_api_voucher_ok_country_code_and_recency_segment
+	pytest -vs src/tests/unit
 
 test_e2e:
 	pytest -v src/tests/e2e
 
-test: unit test_e2e
+test: test_unit test_e2e
 	@echo OK
 
 format:
