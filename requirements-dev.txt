@@ -1,8 +1,7 @@
 -e .
 pytest>=6.2
-# pytest-pgsql>=1.1.2
 pytest-postgresql>=3.1.1
-#psycopg2
+requests>2.25  # required by FastAPI tests
 black>=21.6b0
 isort>=5.9.1
 flake8>=3.9.2

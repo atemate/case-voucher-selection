@@ -9,8 +9,8 @@ from voucher_selection.cli import app
 runner = CliRunner()
 
 
-def test_cli_data_clean_ok(all_orders_raw_path: Path):
-    input_file = all_orders_raw_path
+def test_cli_data_clean_ok(raw_data_path: Path):
+    input_file = raw_data_path
     output_file = Path(tempfile.mktemp())
     assert input_file.exists()
     assert not output_file.exists()

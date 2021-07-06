@@ -47,7 +47,7 @@ See [notebooks](notebooks).
 
 ### Step 2. Extracting the cleaning code to Python
 
-For this purpose, we organised code as a proper Python package [`voucher_selection`](src/voucher_selection) and tested it (see [tests](tests)):
+For this purpose, we organised code as a proper Python package [`voucher_selection`](src/voucher_selection) and tested it (see [tests](src/tests)):
 ```
 $ voucher_selection
 Usage: voucher_selection [OPTIONS] COMMAND [ARGS]...
@@ -70,6 +70,9 @@ Commands:
 
 ### Step 3: Setting up an SQL database for the app
 At this step, we added database connectors and created a command to "seed" values to the DB from a file.
+
+### Step 4: Setting up the REST (HTTP) API server connected to SQL
+At this step, we implemented the logic of computing segments (on-the-fly, without caching), and exposed it via a FastAPI server (similar to Flask).
 
 
 ## CLI Commands
@@ -144,3 +147,42 @@ INFO:root:Executing the query
 INFO:root:Successfully inserted 511427 rows from data/data_clean.csv
 ```
 
+
+### Command group: `voucher_selection api`
+This command group contains all operations with the HTTP (REST) API server.
+
+## Subcommand: `run`
+
+```
+$ voucher_selection api run --help
+Usage: voucher_selection api run [OPTIONS]
+
+Options:
+  --help  Show this message and exit.
+```
+
+This command requires environment variables setup for the Database and the Server (see above).
+
+Example:
+```
+APP_DB_HOST=localhost APP_DB_USERNAME=alice APP_DB_PASSWORD=password voucher_selection api run
+Database config: DBConfig(username='alice', host='localhost', port=5432, database='voucher_selection', table='orders')
+Server config: ServerConfig(host='0.0.0.0', port=8080)
+INFO:     Started server process [4139580]
+INFO:uvicorn.error:Started server process [4139580]
+INFO:     Waiting for application startup.
+INFO:uvicorn.error:Waiting for application startup.
+INFO:     Application startup complete.
+INFO:uvicorn.error:Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:uvicorn.error:Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+
+INFO:root:Found 3 distinct voucher values for `WHERE country_code = 'Peru' AND last_order_ts >= (NOW() - INTERVAL '601 days') AND last_order_ts <= (NOW() - INTERVAL '600 days') AND total_orders >= 3 AND total_orders <= 4`: mean=3520
+INFO:     127.0.0.1:58910 - "POST /voucher HTTP/1.1" 200 OK
+```
+
+To test:
+```
+$ curl http://0.0.0.0:8080/voucher -X POST -H "Content-type: application/json" -d '{"frequency_segment": "3-4", "recency_segment": "600-601", "country_code": "Peru"}'
+{"voucher_amount":3520}
+```
