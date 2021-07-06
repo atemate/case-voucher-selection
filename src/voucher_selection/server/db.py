@@ -1,5 +1,6 @@
 import logging
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
 from typing import Optional, Union
@@ -20,6 +21,38 @@ DB_COLUMNS = {
     "total_orders": "INT",
     "voucher_amount": "INT",
 }
+
+
+@dataclass
+class VoucherSelectionParameters:
+    """Contains parameters that can be used for choosing the voucher:
+    - country_code: full match
+    - total_orders_from and total_orders_to: defines frequency_segment
+    - last_order_from and last_order_to: defines recency_segment
+    """
+
+    country_code: Optional[str] = None
+    total_orders_from: Optional[int] = None
+    total_orders_to: Optional[int] = None
+    last_order_from: Optional[str] = None
+    last_order_to: Optional[str] = None
+
+    def to_where_clause(self):
+        # TODO: test
+        constraints = []
+        if self.country_code:
+            constraints.append(f"country_code = '{self.country_code}'")
+        if self.last_order_from and self.last_order_to:
+            constraints.append(
+                f"last_order_ts >= (NOW() - INTERVAL '{self.last_order_to} days')"
+            )
+            constraints.append(
+                f"last_order_ts <= (NOW() - INTERVAL '{self.last_order_from} days')"
+            )
+        if self.total_orders_from and self.total_orders_to:
+            constraints.append(f"total_orders >= {self.total_orders_from}")
+            constraints.append(f"total_orders <= {self.total_orders_to}")
+        return " AND ".join(constraints)
 
 
 def get_connection(config: DBConfig):
@@ -82,25 +115,11 @@ class DBManager:
 
         logger.info(f"Successfully inserted {size} rows from {csv_path}")
 
-    def select_voucher_amount(
+    def get_voucher_amount(
         self,
-        country_code: Optional[str] = None,
-        last_order_from: Optional[str] = None,
-        last_order_to: Optional[str] = None,
-        total_orders_from: Optional[int] = None,
-        total_orders_to: Optional[int] = None,
+        params: VoucherSelectionParameters,
     ):
-        constraints = ["1=1"]
-        if country_code:
-            constraints.append(f"country_code = '{country_code}'")
-        if last_order_from and last_order_to:
-            constraints.append(f"last_order_ts >= (NOW() - INTERVAL '{last_order_to} days')")
-            constraints.append(f"last_order_ts <= (NOW() - INTERVAL '{last_order_from} days')")
-        if total_orders_from and total_orders_to:
-            constraints.append(f"total_orders >= {total_orders_from}")
-            constraints.append(f"total_orders <= {total_orders_to}")
-        where_clause = " AND ".join(constraints)
-
+        where_clause = params.to_where_clause()
         with self._conn.cursor() as cur:
             sql = dedent(
                 f"""\
@@ -116,9 +135,11 @@ class DBManager:
                 return None
             count, value = found
             value = int(value)
-            logger.info(f"Found {count} distinct voucher values, mean: {value}")
+            logger.info(
+                f"Found {count} distinct voucher values for `{where_clause}`: mean={value}"
+            )
             return value
-            ## Or explicitly:
+            # # Or explicitly:
             # logger.debug(f"Result:\n" + "\n".join(str(row) for row in found))
             # vouchers = list({row[-1] for row in found})
             # result = int(sum(vouchers) / len(vouchers))
@@ -126,11 +147,3 @@ class DBManager:
             #     f"Found {len(vouchers)} elements for constraint `{where_clause}``:\n{vouchers}\n=> mean={result}"
             # )
             # return result
-
-    # def select_all(self):
-    #     with self._conn.cursor() as cur:
-    #         sql = f"SELECT * FROM {self.table}"
-    #         cur.execute(sql)
-    #         exists = cur.fetchmany()
-    #         print(exists)
-    #         return exists
