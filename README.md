@@ -61,7 +61,7 @@ See [notebooks](notebooks).
 
 ### Step 2. Extracting the cleaning code to Python
 
-For this purpose, we organised code as a proper Python package [`voucher_selection`](src/voucher_selection) and tested it (see [tests](src/tests)):
+For this purpose, we organised code as a proper (pip-installable) Python package `voucher_selection` and tested it (see [tests](src/tests)):
 ```
 $ voucher_selection
 Usage: voucher_selection [OPTIONS] COMMAND [ARGS]...
@@ -133,15 +133,11 @@ INFO:/plain/github/mine/case-voucher-selection/src/voucher_selection/data_cleani
 Saving output dataset to: data/data_clean.csv
 ```
 
-Tests:
-- data cleaning logic: [tests/test_data_cleaning.py](tests/test_data_cleaning.py)
-- CLI: [tests/test_cli.py](tests/test_cli.py)
-
 
 ### Command group: `voucher_selection db`
 This command group contains all operations with the database.
 
-> NB: The idea of the data pipeline is that we apply data transformations to immutible data snapshots (pandas `DataFrame`s) and then load them to a PostgreSQL in order to use SQL to compute live aggregations while the REST API is working. This database is read-only and thus fault-tolerant.
+NB: The idea of the data pipeline is that we apply data transformations **on immutible data snapshots** (pandas `DataFrame`s) and then load them to a PostgreSQL in order to use SQL to compute **live aggregations** while the REST API is working. This database is read-only and thus fault-tolerant.
 
 
 ## Subcommand: `seed`
@@ -209,3 +205,16 @@ To test:
 $ curl http://0.0.0.0:8080/voucher -X POST -H "Content-type: application/json" -d '{"frequency_segment": "3-4", "recency_segment": "600-601", "country_code": "Peru"}'
 {"voucher_amount":3520}
 ```
+
+## Tests
+
+All critical parts are covered with tests.
+Due to modular structure of the project, we avoided using mock objects for testing.
+
+- [Unit tests](src/tests/unit)
+  - `test_api.py`: test app at the level of HTTP API. No logic testing.
+  - `test_config.py`: test config defaults and constructing config from env vars.
+  - `test_data_cleaning.py`: data pipeline logic, at the level of `pandas.DataFrame`.
+  - `test_db.py`: data pipeline logic, at the level of `pandas.DataFrame`.
+- [E2e tests](src/tests/e2e)
+  - `test_cli.py`: test CLI commands.

@@ -44,10 +44,10 @@ class VoucherSelectionParameters:
             constraints.append(f"country_code = '{self.country_code}'")
         if self.last_order_from and self.last_order_to:
             constraints.append(
-                f"last_order_ts >= (NOW() - INTERVAL '{self.last_order_to} days')"
+                f"last_order_ts >= (NOW() - INTERVAL '{self.last_order_from} days')"
             )
             constraints.append(
-                f"last_order_ts <= (NOW() - INTERVAL '{self.last_order_from} days')"
+                f"last_order_ts <= (NOW() - INTERVAL '{self.last_order_to} days')"
             )
         if self.total_orders_from and self.total_orders_to:
             constraints.append(f"total_orders >= {self.total_orders_from}")
