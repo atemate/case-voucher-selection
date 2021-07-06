@@ -24,13 +24,7 @@ class DBConfig:
         return f"postgresql://{cred}@{self.host}:{self.port}/{self.database}"
 
 
-@dataclass(frozen=True)
-class Config:
-    server: ServerConfig
-    db: DBConfig
-
-
-def create_server_config(env: Dict[str, Any] = os.environ) -> Config:
+def create_server_config(env: Dict[str, Any] = os.environ) -> ServerConfig:
     config = ServerConfig(
         host=env.get("APP_SERVER_HOST", ServerConfig.host),
         port=int(env.get("APP_SERVER_PORT", ServerConfig.port)),
@@ -46,7 +40,7 @@ def _get_required(env, name: str):
     return val
 
 
-def create_db_config(env: Dict[str, Any] = os.environ) -> Config:
+def create_db_config(env: Dict[str, Any] = os.environ) -> DBConfig:
     config = DBConfig(
         username=_get_required(env, "APP_DB_USERNAME"),
         password=_get_required(env, "APP_DB_PASSWORD"),
@@ -56,7 +50,3 @@ def create_db_config(env: Dict[str, Any] = os.environ) -> Config:
         table=env.get("APP_DB_TABLE", DBConfig.table),
     )
     return config
-
-
-def create_config(env: Dict[str, Any] = os.environ) -> Config:
-    return Config(server=create_server_config(env), db=create_db_config(env))

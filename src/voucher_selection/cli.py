@@ -3,19 +3,23 @@ from pathlib import Path
 
 import pandas as pd
 import typer
+import uvicorn
 
 from .data_cleaning import clean_orders_raw
-from .server.config import create_db_config
-from .server.db import DBManager, get_connection
+from .server.api import get_api
+from .server.config import create_db_config, create_server_config
+from .server.db import get_db
 
 
 app = typer.Typer()
 data_app = typer.Typer()
 db_app = typer.Typer()
+api_app = typer.Typer()
 
 
 app.add_typer(data_app, name="data")
 app.add_typer(db_app, name="db")
+app.add_typer(api_app, name="api")
 
 
 def _setup_logger(level=logging.INFO):
@@ -50,10 +54,6 @@ def data_clean(
     df.to_csv(output_csv, index=False)
 
 
-# server_host: str = typer.Option("0.0.0.0", envvar="SERVER_HOST"),
-# server_port: int = typer.Option(8080, envvar="SERVER_PORT"),
-
-
 @db_app.command("seed")
 def db_seed(
     input_csv: Path = typer.Option(..., help="Path to the dataset in csv format")
@@ -64,9 +64,24 @@ def db_seed(
     db_config = create_db_config()
     typer.echo(f"Database config: {db_config}")
 
-    conn = get_connection(db_config)
-    db = DBManager(conn)
-    typer.echo(f"Creating DB table if not exists...")
-    db.create_table()
-    typer.echo(f"Loading values to DB from file: {input_csv}")
-    db.insert_from_csv(input_csv)
+    with get_db(db_config) as db:
+        typer.echo(f"Creating DB table if not exists...")
+        db.create_table()
+        typer.echo(f"Loading values to DB from file: {input_csv}")
+        db.insert_from_csv(input_csv)
+
+
+@api_app.command("run")
+def api_run():
+    db_config = create_db_config()
+    typer.echo(f"Database config: {db_config}")
+
+    server_config = create_server_config()
+    typer.echo(f"Server config: {server_config}")
+
+    api = get_api(db_config)
+    uvicorn.run(api, host=server_config.host, port=server_config.port)
+
+    with get_db(db_config) as db:
+        typer.echo(f"Creating DB table if not exists...")
+        db.create_table()
