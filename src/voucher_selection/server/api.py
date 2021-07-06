@@ -15,6 +15,8 @@ PATTERN_SEGMENT_INTERVAL = re.compile(r"^(\d+)-(\d+)$")
 
 
 class CustomerInput(pydantic.BaseModel):
+    """Input validation object. All fields are optional.
+    """
     customer_id: Optional[int] = None
     country_code: Optional[str] = None
     last_order_ts: Optional[str] = None
@@ -34,7 +36,7 @@ def parse_segment_interval(value: str) -> Tuple[int, int]:
 
 
 def build_voucher_selection_params(input: CustomerInput) -> VoucherSelectionParameters:
-    # TODO: tests
+    # TODO: tests for full coverage
     country_code = input.country_code
 
     fs = input.frequency_segment

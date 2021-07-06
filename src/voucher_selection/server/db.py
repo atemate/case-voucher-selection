@@ -120,13 +120,15 @@ class DBManager:
         params: VoucherSelectionParameters,
     ):
         where_clause = params.to_where_clause()
+        if where_clause:
+            where_clause = f"WHERE {where_clause}"
         with self._conn.cursor() as cur:
             sql = dedent(
                 f"""\
                 SELECT
                     COUNT(DISTINCT(voucher_amount)), AVG(DISTINCT(voucher_amount))
                 FROM {self.table}
-                WHERE {where_clause}
+                {where_clause}
                 """
             )
             cur.execute(sql)
