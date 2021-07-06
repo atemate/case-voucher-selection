@@ -47,7 +47,7 @@ See [notebooks](notebooks).
 
 ### Step 2. Extracting the cleaning code to Python
 
-For this purpose, we organised code as a proper Python package [`voucher_selection`](src/voucher_selection) and tested it (see [tests](tests)):
+For this purpose, we organised code as a proper Python package [`voucher_selection`](src/voucher_selection) and tested it (see [tests](src/tests)):
 ```
 $ voucher_selection
 Usage: voucher_selection [OPTIONS] COMMAND [ARGS]...

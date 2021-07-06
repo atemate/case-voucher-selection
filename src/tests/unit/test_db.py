@@ -21,4 +21,4 @@ def test_insert_from_csv(db: DBManager, sql_file: Path):
     with db.get_cursor() as cur:
         cur.execute(f"SELECT COUNT(*) FROM {db.table}")
         count = cur.fetchone()[0]
-        assert count == 3
+        assert count == 8
