@@ -65,8 +65,6 @@ def db_seed(
     typer.echo(f"Database config: {db_config}")
 
     with get_db(db_config) as db:
-        typer.echo(f"Creating DB table if not exists...")
-        db.create_table()
         typer.echo(f"Loading values to DB from file: {input_csv}")
         db.insert_from_csv(input_csv)
 
@@ -81,7 +79,3 @@ def api_run():
 
     api = get_api(db_config)
     uvicorn.run(api, host=server_config.host, port=server_config.port)
-
-    with get_db(db_config) as db:
-        typer.echo(f"Creating DB table if not exists...")
-        db.create_table()

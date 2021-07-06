@@ -6,7 +6,7 @@ from textwrap import dedent
 from typing import Optional, Union
 
 import psycopg2
-from psycopg2.extensions import connection
+from psycopg2.extensions import connection as Connection
 
 from ..data_cleaning import load_csv
 from .config import DBConfig
@@ -61,12 +61,17 @@ def get_connection(config: DBConfig):
 
 @contextmanager
 def get_db(db_config: DBConfig):
-    with DBManager(conn=get_connection(db_config)) as db:
+    return get_db_by_connection(get_connection(db_config))
+
+
+@contextmanager
+def get_db_by_connection(db_connection):
+    with DBManager(conn=db_connection) as db:
         yield db
 
 
 class DBManager:
-    def __init__(self, conn: connection):
+    def __init__(self, conn: Connection):
         self._conn = conn
         self._table = "voucher_selection"
 
@@ -79,6 +84,9 @@ class DBManager:
     @property
     def table(self) -> str:
         return self._table
+
+    def get_cursor(self) -> Connection:
+        return self._conn.cursor()
 
     def create_table(self):
         columns = ", ".join(f"{k} {v}" for k, v in DB_COLUMNS.items())
@@ -95,6 +103,7 @@ class DBManager:
 
     def insert_from_csv(self, csv_path: Union[str, Path]):
         df = load_csv(csv_path)
+        self.create_table()
         size = df.shape[0]
 
         columns = ", ".join(DB_COLUMNS)
@@ -133,9 +142,9 @@ class DBManager:
             )
             cur.execute(sql)
             found = cur.fetchone()
-            if not found:
-                return None
             count, value = found
+            if count == 0:
+                return None
             value = int(value)
             logger.info(
                 f"Found {count} distinct voucher values for `{where_clause}`: mean={value}"

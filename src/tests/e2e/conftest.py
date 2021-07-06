@@ -10,7 +10,7 @@ pytest_plugins = ["pytest_postgresql"]
 CURRENT_DIR = Path(__file__).parent
 TESTS_DIR = CURRENT_DIR
 
-PROJECT_ROOT = TESTS_DIR.parent.parent
+PROJECT_ROOT = TESTS_DIR.parent.parent.parent
 
 
 @pytest.fixture
@@ -29,6 +29,6 @@ def data_root(project_root: Path) -> Path:
 
 
 @pytest.fixture
-def all_orders_raw_path(data_root: Path) -> Path:
+def raw_data_path(data_root: Path) -> Path:
     # TODO: instead of reading the whole dataset, prepare a small part
     return data_root / "data.parquet"

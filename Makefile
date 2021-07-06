@@ -4,7 +4,7 @@ setup:
 	pip install -r requirements-dev.txt
 
 test_unit:
-	pytest -v src/tests/unit
+	pytest -vs src/tests/unit -k test_api_voucher_ok_country_code_and_recency_segment
 
 test_e2e:
 	pytest -v src/tests/e2e

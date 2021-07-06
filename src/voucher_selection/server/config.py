@@ -3,6 +3,13 @@ from dataclasses import dataclass, field
 from typing import Any, Dict
 
 
+def _get_required(env, name: str):
+    val = env.get(name)
+    if not val:
+        raise ValueError(f"Missing env var: '{name}'")
+    return val
+
+
 @dataclass(frozen=True)
 class ServerConfig:
     host: str = "0.0.0.0"
@@ -31,13 +38,6 @@ def create_server_config(env: Dict[str, Any] = os.environ) -> ServerConfig:
     )
 
     return config
-
-
-def _get_required(env, name: str):
-    val = env.get(name)
-    if not val:
-        raise ValueError(f"Missing env var: '{name}'")
-    return val
 
 
 def create_db_config(env: Dict[str, Any] = os.environ) -> DBConfig:

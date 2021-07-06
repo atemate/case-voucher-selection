@@ -3,14 +3,11 @@ from setuptools import setup
 
 REQUIREMENTS = [
     "pandas>=1.3.0",
-    "fastparquet>=0.6.0",
-    "typer>=0.3.2",
-    "fastapi>=0.63.0",
-    # "asyncpg>=0.21.0",
-    "psycopg2>=2.8.6",
-    # "databases[postgres]==0.4.1",
-    # "sqlalchemy>=1.3.22",
-    "uvicorn>=0.13.3",
+    "fastparquet>=0.6.0",  # to load parquet files
+    "typer>=0.3.2",  # CLI
+    "fastapi>=0.63.0",  # HTTP API
+    "psycopg2>=2.8.6",  # PostgreSQL
+    "uvicorn>=0.13.3",  # HTTP
 ]
 
 setup(
