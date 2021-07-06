@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    # volumes:
+    # - ./db:/var/lib/postgresql/data  # no need to persist SQL as it's read-only
+    ports:
+    - "5432:5432"
+    environment:
+    - POSTGRES_USER=alice
+    - POSTGRES_PASSWORD=password
+    - POSTGRES_DB=voucher_selection
+    hostname: postgres.host
+    networks:
+    - app
+
+  api:
+    build: .
+    volumes:
+    - ./data:/data
+    command: bash -c 'voucher_selection db seed --input-csv=/data/data_clean.csv && voucher_selection api run'
+    ports:
+    - "8080:8080"
+    environment:
+    - APP_DB_HOST=postgres.host
+    - APP_DB_USERNAME=alice
+    - APP_DB_PASSWORD=password
+    - APP_DB_DATABASE=voucher_selection
+    networks:
+    - app
+    depends_on:
+    - db
+
+networks:
+  app:
